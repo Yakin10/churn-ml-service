@@ -1,11 +1,11 @@
 from fastapi.testclient import TestClient
 
-from src.churn_ml.api import app
-
-client = TestClient(app)
+#from src.churn_ml.api import app
+import src.churn_ml.api as api
+client = TestClient(api.app)
 
 def test_home_endpoint():
-    with TestClient(app) as client:
+    with TestClient(api.app) as client:
         response = client.get("/")
 
     assert response.status_code == 200
@@ -34,7 +34,7 @@ def test_prediction_endpoint():
         "TotalCharges": 110.0,
     }
 
-    with TestClient(app) as client:
+    with TestClient(api.app) as client:
         response = client.post("/predict", json=customer)
 
         assert response.status_code == 200, response.text
@@ -66,7 +66,7 @@ def test_invalid_contract_is_rejected():
         "TotalCharges": 110.0,
     }
 
-    with TestClient(app) as client:
+    with TestClient(api.app) as client:
         response = client.post("/predict", json=customer)
 
         assert response.status_code == 422

@@ -1,9 +1,9 @@
 from src.churn_ml.predict import predict_churn
 
-def test_prediction_returns_expected_fields():
+def test_prediction_returns_expected_fields(trained_test_model):
     customer = {
         "gender": "Female",
-        "SeniorCitizen": 0,
+       "SeniorCitizen": 0,
         "Partner": "Yes",
         "Dependents": "No",
         "tenure": 2,
@@ -23,7 +23,7 @@ def test_prediction_returns_expected_fields():
         "TotalCharges": 110.0,
     }
 
-    result = predict_churn(customer)
+    result = predict_churn(customer, trained_test_model)
 
     assert result['prediction'] in {"Churn", "No Churn"}
     assert 0.0 <= result["churn_probability"] <= 1.0
