@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import joblib
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
@@ -92,6 +93,10 @@ def main() -> None:
         Y_test, predictions, labels=[0,1], target_names=["No Churn", "Churn"], 
         zero_division=0
     ))
+
+    MODEL_PATH = ROOT_DIR / "models" / "churn_pipeline.joblib"
+    joblib.dump(pipeline, MODEL_PATH)
+    print(f"\n Model saved to : {MODEL_PATH}")
 
 if __name__ == "__main__":
     main()
