@@ -4,14 +4,21 @@ from fastapi.testclient import TestClient
 import src.churn_ml.api as api
 client = TestClient(api.app)
 
-def test_home_endpoint():
+def test_home_endpoint(trained_test_model, monkeypatch):
+    monkeypatch.setattr(
+        api, "load_model", lambda: trained_test_model
+    )
     with TestClient(api.app) as client:
         response = client.get("/")
 
     assert response.status_code == 200
     assert "message" in response.json()
 
-def test_prediction_endpoint():
+def test_prediction_endpoint(trained_test_model, monkeypatch):
+    monkeypatch.setattr(
+        api, "load_model", lambda: trained_test_model
+    )
+
     customer = {
         "gender": "Female",
         "SeniorCitizen": 0,
@@ -43,7 +50,11 @@ def test_prediction_endpoint():
         assert result["prediction"] in {"Churn", "No Churn"}
         assert 0 <= result["churn_probability"] <=1
 
-def test_invalid_contract_is_rejected():
+def test_invalid_contract_is_rejected(trained_test_model, monkeypatch):
+    monkeypatch.setattr(
+        api, "load_model", lambda: trained_test_model
+    )
+    
     customer = {
         "gender": "Female",
         "SeniorCitizen": 0,
