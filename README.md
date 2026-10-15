@@ -11,8 +11,8 @@ The model is a learning and portfolio project, not a validated production decisi
 ## Live Demo
 
 The Customer Churn Prediction API is deployed on Render.
-- API health Check: https://churn-ml-service-otlf.onrender.com/
--intractive API documentation: https://churn-ml-service-otlf.onrender.com/docs
+- API health Check: https://churn-ml-service-otlf.onrender.com/ .
+-intractive API documentation: https://churn-ml-service-otlf.onrender.com/docs .
 
 Use the intractive documentation to submit customer details to the /predict endpoint and receive a churn prediction and churn probability.
 NOTE: The free hosting service may take a little time to respond after a period of inactivity.
