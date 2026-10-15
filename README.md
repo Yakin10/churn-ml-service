@@ -81,10 +81,10 @@ Run tests:
 - [x] Preprocessing and model training pipeline
 - [x] Baseline evaluation
 - [x] Automated pipeline test
-- [ ] Model artifact persistence
-- [ ] Prediction API
-- [ ] Docker packaging
-- [ ] Continuous integration
+- [x] Model artifact persistence
+- [x] Prediction API
+- [x] Docker packaging
+- [x] Continuous integration
 - [ ] Deployment and monitoring
 
 ## Limitations

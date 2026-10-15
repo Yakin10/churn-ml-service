@@ -1,15 +1,25 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field, field_validator
 
 from src.churn_ml.predict import load_model, predict_churn
 
+model = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global model
+    model = load_model()
+    yield
+    model = None
+
 app = FastAPI(
     title = "Customer Churn Prediction API",
     description = "Predict Customer churn using a trained ML Pipeline.",
     version = "1.0.0",
+    lifespan=lifespan,
 )
-
-model = None
 
 
 class Customer(BaseModel):
@@ -53,6 +63,53 @@ class Customer(BaseModel):
     def validate_tenure(cls, value):
         if value > 100:
             raise ValueError("tenure must be between 0 and 100 months")
+        return value
+    
+    @field_validator(
+        "Partner",
+        "Dependents",
+        "PhoneService",
+        "PaperlessBilling"
+    )
+    @classmethod
+    def validate_yes_no_fields(cls, value):
+        if value not in {"Yes", "No"}:
+            raise ValueError("Value must be Yes or No")
+        return value
+
+    @field_validator(
+        "MultipleLines",
+        "OnlineSecurity",
+        "OnlineBackup",
+        "DeviceProtection",
+        "TechSupport",
+        "StreamingTV",
+        "StreamingMovies"
+    )
+    @classmethod
+    def validate_yes_no_or_no_phone_service(cls, value):
+        if value not in {"Yes", "No", "No phone service", "No internet service"}:
+            raise ValueError("Invalid service option")
+        return value
+
+    @field_validator("InternetService")
+    @classmethod
+    def validate_internet_service(cls, value):
+        if value not in {"DSL", "Fiber optic", "No"}:
+            raise ValueError("Invalid InternetService")
+        return value
+
+    @field_validator("PaymentMethod")
+    @classmethod
+    def validate_payment_method(cls, value):
+        allowed = {
+            "Electronic check",
+            "Mailed check",
+            "Bank transfer (automatic)",
+            "Credit card (automatic)"
+        }
+        if value not in allowed:
+            raise ValueError("Invalid PaymentMethod")
         return value
 
 
