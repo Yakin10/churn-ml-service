@@ -13,18 +13,22 @@ def load_model():
         )
     return joblib.load(MODEL_PATH)
 
-def predict_churn(customer: dict, model=None) -> dict:
+def predict_churn(customer: dict, model=None, threshold: float = 0.5) -> dict:
     if model is None:
         model = load_model()
+    
+    if not 0 <= threshold <=1:
+        raise ValueError("threshold must be between 0 and 1")
 
     customer_df = pd.DataFrame([customer])
 
-    prediction = int(model.predict(customer_df)[0])
+    
     probability = float(model.predict_proba(customer_df)[0][1])
+    prediction = int(probability >= threshold)
 
     return {
         "prediction" : "Churn" if prediction == 1 else "No Churn",
-        "churn_probability" : round(probability, 4),
+        "churn_probability" : round(probability, 4)
     }
 
 if __name__ == "__main__":

@@ -81,7 +81,7 @@ def main() -> None:
     print(f"Precision : {precision_score(Y_test, predictions, zero_division=0):.3f}")
     print(f"Recall : {recall_score(Y_test, predictions, zero_division=0):.3f}")
     print(f"F1 score : {f1_score(Y_test, predictions, zero_division=0):.3f}")
-    print(f"ROC_AUC : {roc_auc_score(Y_test, predictions):.3f}")
+    print(f"ROC_AUC : {roc_auc_score(Y_test, probabilities):.3f}")
 
     print("\n--- confusion Matrix ---")
     print("Rows = actual [No Churn, Churn]")
@@ -93,6 +93,30 @@ def main() -> None:
         Y_test, predictions, labels=[0,1], target_names=["No Churn", "Churn"], 
         zero_division=0
     ))
+
+# Compare decision thresholds to evaluate the precision-recall trade-off.
+# Select the production threshold based on business costs, not accuracy alone.
+    print("\n--- Threshold Comparison ---")
+
+    for threshold in [0.3, 0.4, 0.5]:
+        threshold_predictions = (probabilities >= threshold).astype(int)
+
+        precision = precision_score(
+            Y_test, threshold_predictions, zero_division=0
+        )
+        recall = recall_score(
+            Y_test, threshold_predictions, zero_division=0
+        )
+        f1 = f1_score(
+            Y_test, threshold_predictions, zero_division=0
+        )
+
+        print(
+            f"Threshold: {threshold:.1f} | "
+            f"Precision: {precision:.3f} | "
+            f"Recall: {recall:.3f} | "
+            f"F1 : {f1:.3f}"
+        )
 
     MODEL_PATH = ROOT_DIR / "models" / "churn_pipeline.joblib"
     joblib.dump(pipeline, MODEL_PATH)

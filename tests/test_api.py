@@ -275,3 +275,68 @@ def test_prediction_returns_503_when_model_is_unavailable(monkeypatch):
     
     assert response.status_code == 503
     assert response.json()["detail"] == "Model is not loaded."
+
+def test_prediction_endpoint_accepts_custom_threshold(trained_test_model, monkeypatch):
+    monkeypatch.setattr(api, "load_model", lambda: trained_test_model)
+
+    customer = {
+        "gender": "Female",
+        "SeniorCitizen": 0,
+        "Partner": "Yes",
+        "Dependents": "No",
+        "tenure": 2,
+        "PhoneService": "Yes",
+        "MultipleLines": "No",
+        "InternetService": "DSL",
+        "OnlineSecurity": "No",
+        "OnlineBackup": "Yes",
+        "DeviceProtection": "No",
+        "TechSupport": "No",
+        "StreamingTV": "No",
+        "StreamingMovies": "No",
+        "Contract": "Month-to-month",
+        "PaperlessBilling": "Yes",
+        "PaymentMethod": "Electronic check",
+        "MonthlyCharges": 55.0,
+        "TotalCharges": 110.0,
+    }
+
+    with TestClient(api.app) as client:
+        response = client.post(
+            "/predict?threshold=0.3", json=customer
+        )
+    
+    assert response.status_code == 200, response.text
+    assert response.json()["prediction"] in {"Churn", "No Churn"}
+
+def test_prediction_endpoint_rejects_invalid_threshold(trained_test_model, monkeypatch):
+    monkeypatch.setattr(api, "load_model", lambda: trained_test_model)
+
+    customer = {
+        "gender": "Female",
+        "SeniorCitizen": 0,
+        "Partner": "Yes",
+        "Dependents": "No",
+        "tenure": 2,
+        "PhoneService": "Yes",
+        "MultipleLines": "No",
+        "InternetService": "DSL",
+        "OnlineSecurity": "No",
+        "OnlineBackup": "Yes",
+        "DeviceProtection": "No",
+        "TechSupport": "No",
+        "StreamingTV": "No",
+        "StreamingMovies": "No",
+        "Contract": "Month-to-month",
+        "PaperlessBilling": "Yes",
+        "PaymentMethod": "Electronic check",
+        "MonthlyCharges": 55.0,
+        "TotalCharges": 110.0,
+    }
+
+    with TestClient(api.app) as client:
+        response = client.post(
+            "/predict?threshold=1.3", json=customer
+        )
+    
+    assert response.status_code == 422

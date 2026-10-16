@@ -126,14 +126,21 @@ def home():
     return {"message": "Customer Churn Prediction API is running"}
 
 @app.post("/predict")
-def predict(customer: Customer):
+def predict(customer: Customer, threshold: float = 0.5):
     if model is None:
         raise HTTPException(
             status_code=503,
             detail="Model is not loaded."
         )
+    
+    if not 0 <= threshold <= 1:
+        raise HTTPException(
+            status_code=422,
+            detail="Threshold must be between 0 and 1."
+        )
+    
     try:
-        result = predict_churn(customer.model_dump(), model)
+        result = predict_churn(customer.model_dump(), model, threshold=threshold)
         logger.info("Prediction completed successfully.")
         return result
     except Exception:
