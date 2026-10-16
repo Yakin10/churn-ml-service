@@ -37,6 +37,23 @@ NOTE: The raw dataset is not committed to this repository.
 
 Preprocessing and model training are combined in a scikit-learn Pipeline to ensure transformations are learned from training data.
 
+### Configurable Prediction Threshold
+
+The `/predict` endpoint accepts an optional `threshold` query parameter to control the classification decision.
+
+- **Default:** `0.5`
+- **Lower threshold (e.g., `0.3`):** identifies more potentially at-risk customers, typically increasing recall while reducing precision.
+- **Higher threshold:** generally reduces false alarms but may miss more customers who churn.
+
+Example requests:
+
+- `/predict?threshold=0.3`
+- `/predict?threshold=0.5`
+
+The response includes the predicted class (`Churn` or `No Churn`) and the estimated `churn_probability`. Changing the threshold changes the classification decision, not the underlying probability estimate.
+
+Threshold selection should reflect the business costs of missed churners and unnecessary retention outreach.
+
 ## Baseline Results
 
 | Metric | Score |
@@ -45,7 +62,7 @@ Preprocessing and model training are combined in a scikit-learn Pipeline to ensu
 | Churn precision | 0.657 |
 | Churn recall | 0.559 |
 | Churn F1 | 0.604 |
-| ROC-AUC | 0.727 |
+| ROC-AUC | 0.842 |
 
 These results use a stratified 80/20 train-test split with random_state=42. Results may vary with dataset or library changes.
 
