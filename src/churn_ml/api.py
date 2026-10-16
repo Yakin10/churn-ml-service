@@ -1,10 +1,13 @@
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field, field_validator
 
 from src.churn_ml.predict import load_model, predict_churn
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 model = None
 
 @asynccontextmanager
@@ -129,8 +132,13 @@ def predict(customer: Customer):
             status_code=503,
             detail="Model is not loaded."
         )
-    #try:
-    #    return predict_churn(customer.model_dump())
-    #except FileNotFoundError as exc:
-    #    raise HTTPException(status_code=503, detail=str(exc)) from exc
-    return predict_churn(customer.model_dump(), model)
+    try:
+        result = predict_churn(customer.model_dump(), model)
+        logger.info("Prediction completed successfully.")
+        return result
+    except Exception:
+        logger.exception("Prediction failed")
+        raise HTTPException(
+            status_code=500,
+            detail="Prediction failed due to internal server error."
+        )
