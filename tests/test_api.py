@@ -242,3 +242,36 @@ def test_invalid_payment_method_is_rejected(trained_test_model, monkeypatch):
         response = client.post("/predict", json=customer)
 
     assert response.status_code == 422
+
+def test_prediction_returns_503_when_model_is_unavailable(monkeypatch):
+    monkeypatch.setattr(
+        api, "load_model", lambda: None
+    )
+
+    customer = {
+        "gender": "Female",
+        "SeniorCitizen": 0,
+        "Partner": "Yes",
+        "Dependents": "No",
+        "tenure": 2,
+        "PhoneService": "Yes",
+        "MultipleLines": "No",
+        "InternetService": "DSL",
+        "OnlineSecurity": "No",
+        "OnlineBackup": "Yes",
+        "DeviceProtection": "No",
+        "TechSupport": "No",
+        "StreamingTV": "No",
+        "StreamingMovies": "No",
+        "Contract": "Month-to-month",
+        "PaperlessBilling": "Yes",
+        "PaymentMethod": "Electronic check",
+        "MonthlyCharges": 55.0,
+        "TotalCharges": 110.0,
+    }
+
+    with TestClient(api.app) as client:
+        response = client.post("/predict", json=customer)
+    
+    assert response.status_code == 503
+    assert response.json()["detail"] == "Model is not loaded."
